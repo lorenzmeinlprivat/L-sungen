@@ -1,0 +1,331 @@
+---
+title: "Prüfung Vertiefungswissen ADS Immersion"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+## Prüfung im Vertiefungswissen
+
+# Actuarial Data Science Immersion
+
+## gemäß der Prüfungsordnung 4
+## der Deutschen Aktuarvereinigung e.V.
+
+## Zeitraum: 15.04.2021 bis 15.05.2021
+
+__Hinweise:__
+- Die Gesamtpunktzahl beträgt 180 Punkte. Die Prüfung ist bestanden, wenn mindestens 90 (50 %) Punkte erreicht werden.
+- Bitte prüfen Sie das Ihnen vorliegende Dokument auf Vollständigkeit. Insgesamt sind 31 Aufgaben enthalten.
+- Alle Antworten sind zu begründen und Lösungswege müssen nachvollziehbar sein.
+- Mit der Einreichung eines Ergebnisnotebooks erklärt die zu prüfende Person, dass das vorliegende Ergebnisbericht inklusive Code- und Beschreibungsanteilen eigenständig erzeugt worden ist. Verstöße gegen diese Grundlagen können vom Prüfungsausschuss sanktioniert werden und zum Ausschluss von der Prüfung führen.
+- Die Struktur des Notebooks muss beibehalten werden. Nutzen Sie für Ihre Antworten die freien Zelle(n), die einem Frageblock folgen.
+
+# 0. Einführende Informationen
+
+### Erläuterungen zur Datengrundlage:
+
+Zusätzlich zu diesem Dokument sollten Ihnen zwei Datensätze vorliegen: cs_train_pk1.csv und cs_test_pk1.csv. Wie die Namen bereits andeuten, soll der erste Datensatz zum Training und der zweite Datensatz zum Testen verwendet werden.
+
+Die Datensätze enthalten verschiedene Schadenmeldungen. Dabei beinhalten die verschiedenen Features (z.B. cat1, cat2, ...) Informationen zum jeweiligen Schaden. Die Zielvariable ist loss.
+
+### Inhaltsangabe:
+
+Mit den Aufgaben innerhalb der folgenden Abschnitte sollen die Daten analysiert werden:
+
+1. Allgemeines und Datenimport
+
+    1.1. Allgemeine Fragen
+    
+    1.2. Trainings-Daten einlesen und einen ersten Überblick erhalten
+
+2. Explorative Datenanalyse
+
+    2.1. Explorative Datenanalyse der numerischen Merkmale
+
+    2.2. Explorative Datenanalyse der kategoriellen Merkmale
+
+    2.3. Daten für die Modellierung vorbereiten
+    
+3. Modelle
+
+    3.1. Entscheidungsbaumbasierte Modellensembles 
+    
+            3.1.1. Random-Forest-Verfahren
+
+            3.1.2. Gradient-Boosting-Verfahren
+        
+    3.2. Regularisierte Lineare Modelle
+
+    3.3. Vorwärtsgerichtetes Neuronales Netz mit Keras/TensorFlow
+
+4. Blending und Scoring
+
+### Anmerkungen zur Lösung:
+
+Hierzu soll ein *Jupyter*-Notebook oder ein *rmarkdown*-Notebook entsprechend erweitert werden. Die zu verwendenden Programmiersprachen sind *Python* oder *R*. Dabei muss sichergestellt werden, dass aktuelle Software-Versionen verwendet werden (Python 3.7 oder höher, R 3.6 oder höher).
+
+Die Aufgabentexte sollen in das Notebook übernommen und dort in der vorgegebenen Reihenfolge beantwortet werden. Ab Frage 4 sind Codes anzugeben, fehlerfrei auszuführen und die Aufgabenerledigung ist folgendermaßen zu strukturieren: 
+
+1.	Markdown: Aufgabentext
+2.	Markdown: Kurze Beschreibung dessen, was im Code gemacht wird.
+3.	Der entsprechende, #-kommentierte R- oder Python-Code samt Output, ggf. mehrfach.
+4.	Markdown: Erläuterung, Interpretation und Kommentierung gemäß Aufgabenstellung, Beantwortung der Fragen.
+
+Zusätzlich soll das Notebook sinnvoll strukturiert werden, z.B. durch Kapitelüberschriften, Abschnitte und ein Inhaltsverzeichnis.
+Alle genannten Verfahren sind konkret und sachgerecht zusammen mit der ggf. erforderlichen Datenaufbereitung (z.B. Kodierungen, Skalierung, Transformation) auf den Datensatz anzuwenden. 
+
+Das vorgegeben Gütemaß ist der mittlere absolute Fehler ("mean absolute error", MAE). Die Güte jedes Modells soll auf Basis einer für alle Modelle einheitlichen Validierungsstichprobe ermittelt, angezeigt und kommentiert werden. 
+
+Die Verwendung von Code-Auszügen aus online verfügbaren Notebooks, die für andere Datensätze entwickelt wurden, ist unter Angabe der jeweiligen Quelle zulässig. 
+
+# 1. Allgemeines und Datenimport
+
+## 1.1 Allgemeine Fragen
+
+### A-01: Welche grundsätzliche gute Praxis sollte beim Arbeiten mit Jupyter Notebooks beachtet werden? (Lernziele 3.2.3, 3.2.4) - __[2&nbsp;Punkte]__
+
+Lösungsvorschlag A-01:
+
+* Ergebnisse von rechenintensiven Schritten zwischenspeichern, damit nicht immer der komplette Code durchlaufen werden muss und unnötige Wartezeiten entstehen
+* Verschiedene logische Abschnitte sollten in verschiedene Zellen gepackt werden
+* Die Analysen sollten mit ausreichenden Erklärungen kommentiert werden
+* Benutzung von version control systems wie z.B. git (gilt natürlich nicht nur für Jupyter Notebooks sondern für so gut wie alle Data Science Projekte die man durchführt)
+
+
+### A-02: Wie kann erreicht werden, dass das eingereichte Notebook reproduzierbar lauffähig ist? (Lernziele 3.2.3, 3.2.4, 3.4.5) - __[3&nbsp;Punkte]__
+
+Lösungsvorschlag A-02:
+
+* Abhängigkeiten angeben und genau spezifizieren (z.B. verwednete Package Versionen und Version der R/Python Installation)
+* Angeben was und woher man von außerhalb in das Notebook importiert (z.B. Daten)
+* Beides direkt am Anfang des Notebooks spezifizieren
+* **Soll ich noch was zu virtual environments schreiben?**
+
+### A-03: Bei den zugrunde liegenden Daten handelt es sich um einen synthetisierten Datensatz aus dem Bereich der Versicherungsbranche. Er wurde in Anlehnung an öffentlich verfügbare Datensätze, zu denen online zahlreiche Notebooks verfügbar sind, erzeugt. Für die Bearbeitung der Aufgaben ist die Sparte und der konkrete Verwendungszweck im Folgenden irrelevant, das letztliche "Ziel" der Aufgaben besteht darin, die enthaltene Zielgröße möglichst präzise zu prognostizieren. Der Datensatz ist somit im Hinblick auf Einhaltung der kartellrechtlichen Grundlagen unverdächtig. Welche Rechtsnormen oder Vorgaben finden bei echten Daten Anwendung, bevor die Entscheidung getroffen werden kann, dass diese für eine Modellierung herangezogen werden können? (Lernziele 1.1.1, 1.1.2) - __[5&nbsp;Punkte]__
+
+Lösungsvorschlag A-03:
+
+Es findet insbesondere die DSGVO Anwendung. 
+
+** Noch weitere? **
+
+** Auf Details der DSGVO eingehen **
+
+
+# 1.2. Trainingsdaten einlesen und einen ersten Überblick erhalten
+
+### A-04: Bevor die eigentliche Verarbeitung beginnt, sollen die notwendigen Programmbibliotheken aufgerufen/importiert sowie der Datensatz aus der Datei `cs_train.csv` eingelesen und die ersten Datensätze (vollständig) angezeigt werden. (Lernziel 3.4.5) - __[3&nbsp;Punkte]__
+
+```{r}
+
+```
+
+
+### A-05: Wie viele Schadenfälle und Merkmale hat der Datensatz? (Lernziele 3.3.1, 3.4.1) - __[1&nbsp;Punkt]__
+
+```{r}
+
+```
+
+
+### A-06: Das Merkmal 'id' soll entfernt werden. Darüber hinaus ist zu prüfen, ob und wenn ja, wie viele Werte fehlen. Welche Schlussfolgerung ergibt sich daraus? (Lernziele 3.3.2, 3.4.4) - __[1&nbsp;Punkt]__
+
+```{r}
+
+```
+
+
+# 2. Explorative Datenanalyse
+
+## 2.1. Explorative Datenanalyse der numerischen Merkmale
+
+### A-07: Für numerischen Merkmalen des Datensatzes sind die Wertebereiche festzustellen. Existiert eine Verteilungsschiefe und wie sieht diese, falls vorhanden, aus? (Lernziele 3.3.2, 3.4.4) - __[5&nbsp;Punkte]__
+
+```{r}
+
+```
+
+
+### A-08: Die Zielgröße soll geeignet logarithmisch transformiert werden. Wieso ist das nötig, bzw. sinnvoll? Welche Folgen kann diese Vorgehensweise auf die prognostizierten Werte haben? (Lernziele 3.3.2, 3.4.4) - __[5&nbsp;Punkte]__
+
+```{r}
+
+```
+
+### A-09: Es soll im Folgenden die Verteilungsdichte der numerischen Merkmale visualisiert werden. Welche konzeptionellen Möglichkeiten dazu gibt es und wie unterscheiden sich diese? (Lernziele 3.3.2, 3.4.4) - __[5&nbsp;Punkte]__
+
+```{r}
+
+```
+
+
+### A-10: Im Weiteren soll die Korrelation zwischen den numerischen Merkmalen einschließlich 'loss' bestimmt werden. Dies ist auch in einer geeigneten Graphik darzustellen. Wieso ist die grafische Darstellung sinnvoll? Was sind die auffälligsten Zusammenhänge? (Lernziel 5.2.3) - __[5&nbsp;Punkte]__
+
+```{r}
+
+```
+
+
+## 2.2. Explorative Datenanalyse der kategoriellen Merkmale
+
+### A-11: Die Häufigkeitsverteilungen der kategoriellen Merkmale sind als Säulengraphiken darzustellen. Welche Schlussfolgerungen ergeben sich? (Lernziele 5.2.1, 6.1.2) - __[5&nbsp;Punkte]__
+
+```{r}
+
+```
+
+### A-12: Welche Erkenntnisse können aus dem logarithmierten Schadenaufwand gezogen werden? Zudem sollen Boxplot-Diagramme für jedes Attribut der kategoriellen Merkmale dargestellt werden. Was ist daraus abzuleiten? (Lernziele 5.2.1, 6.1.2) - __[5&nbsp;Punkte]__
+
+```{r}
+
+```
+
+## 2.3. Daten für die Modellierung vorbereiten
+
+### A-13: Der Zufallsgenerator soll sinnvoll und zielführend eingestellt werden. Welche Möglichkeiten zur Kontrolle des "Random State" gibt es dazu und wie wirken sie sich auf die Reproduzierbarkeit aus? (Lernziel 3.3.1, 3.4.1) - __[2&nbsp;Punkte]__
+
+```{r}
+
+```
+
+### Wenden Sie diesen im weiteren Verlauf zur Erzeugung reproduzierbare Ergebnisse an. Setzen Sie nach Vollendung Ihrer Analyse einen neuen Startwert und überprüfen Sie die Stabilität Ihrer Ergebnisse. 
+
+### A-14: Zur sinnvollen Verwendung der kategoriellen Merkmale in Regressionsmodellen müssen diese (häufig) enkodiert werden. Es soll ein "One-Hot-Encoding" auf die kategoriellen Merkmale angewendet werden. Welche anderen Möglichkeiten des Encodings gibt es und wie unterscheiden sie sich bezüglich Praktikabilität und Performance? Welche möglichen Unterschiede zwischen den Trainings- und Testdaten sind hierbei zu beachten? (Lernziel 3.3.1, 3.4.1) - __[6&nbsp;Punkte]__
+
+```{r}
+
+```
+
+
+### A-15: Das Ergebnis des "One-Hot-Encoding" ist zu erläutern. Was sind die zu erwartenden Folgen? Treten hier Probleme hinsichtlich des "Curse of Dimensionality" auf? Welcher Art sind diese und welcher Umgang sollte damit getroffen werden? (Lernziel 5.1.1) - __[5&nbsp;Punkte]__
+
+
+
+### A-16: Auf Basis der Trainingsdaten sind die üblichen ML-Matrizen X und y für das Modelltraining und für die Modellvalidierung zu erzeugen. (Lernziele 3.3.3, 3.4.5) - __[2&nbsp;Punkte]__
+
+```{r}
+
+```
+
+# 3. Modellierung
+
+
+### A-17: Es sollen Datenstrukturen vorbereitet werden, die einen komfortablen Vergleich der Modelle und Ergebnisse erleichtern. Worauf gilt es hierbei zu achten und welche Aspekte sind in Bezug auf die Gütemaße bereits vor der Modellierung zu überlegen? Welche Vor- und Nachteile hat das vorgegebene Gütemaß mittlerer absoluter Fehler (MAE) im Vergleich zum mittleren quadratischen Fehler (MSE) im Hinblick auf die Vorhersagegenauigkeit auf individueller Ebene sowie die Erwartungstreue des Schätzers? (Lernziel 4.1.7) - __[5&nbsp;Punkte]__
+
+```{r}
+
+```
+
+## 3.1. Entscheidungsbaumbasierte Modellensembles
+
+### 3.1.1. Random-Forest-Verfahren
+
+### A-18: Zunächst soll das Random-Forest-Verfahren verwendet werden. Es sollen die Hyperparameter Baumtiefe und Baumanzahl über eine Gittersuche bestimmt werden. Was sind Hyperparameter, was ist ihre Bedeutung? (Lernziele 4.1.3, 4.1.4) - __[10&nbsp;Punkte]__
+
+```{r}
+
+```
+
+### A-19: Die Variablen-Importance (Z. 4.1.4) soll berechnet werden und Auskunft über die Eigenschaften des trainierten Lerners geben. Welche Möglichkeiten zur Berechnung und Visualisierung am Beispiel des Random-Forest sind hier zielführend? (Lernziel 4.1.4) - __[8&nbsp;Punkte]__
+
+```{r}
+
+```
+
+### 3.1.2 Gradient-Boosting-Verfahren
+
+### A-20: Die hinter den Gradient-Boosting-Tools lightGBM, XGBoost und CatBoost stehende Methodik ist zu beschreiben. Welche Unterschiede, Vor- und Nachteile lassen sich identifizieren? Welches Konzept eignet sich im vorliegenden Fall? (Lernziele 3.2.1, 4.1.7) - __[8&nbsp;Punkte]__
+
+```{r}
+
+```
+
+### A-21: Es ist eine Hyperparameteroptimierung über eine mehrdimensionale "Randomized Search" für lightGBM durchzuführen. (Lernziele 3.2.1, 4.1.7) - __[8&nbsp;Punkte]__
+
+```{r}
+
+```
+
+
+### A-22: Es ist eine Hyperparameteroptimierung über eine mehrdimensionale "Randomized Search" für XGBoost durchzuführen. (Lernziele 3.2.1, 4.1.7) - __[8&nbsp;Punkte]__
+
+```{r}
+
+```
+
+
+### A-23: Es soll Catboost mit Default-Werten angewendet werden. (Lernziele 3.2.1, 4.1.7) - __[4&nbsp;Punkte]__
+
+```{r}
+
+```
+
+### A-24: Es sind die Ergebnisse und Laufzeiten von A-21 bis A-23 zu vergleichen und zu bewerten. (Lernziele 3.2.1, 4.1.7) - __[4&nbsp;Punkte]__
+
+```{r}
+
+```
+
+### A-25: Es soll für die in A-21, A-22 und A-23 trainierten Modelle die "Variable-Importance" berechnet und für die 20 wichtigesten Merkmale visualisiert werden. Welche Unterschiede im Vergleich zum RF-Verfahren ergeben sich und worauf sind diese zurückzuführen? (Lernziel 4.1.4) - __[4&nbsp;Punkte]__
+
+```{r}
+
+```
+
+## 3.2. Regularisierte Lineare Modelle
+
+### 3.2.1 Datenaufbereitung
+
+```{r}
+
+```
+
+### 3.2.2 Das Lasso-Verfahren
+
+### A-26: Es sind die Gemeinsamkeiten und der Unterschied zwischen den Verfahren Ridge-Regression und Lasso-Regression zu erläutern. Das Lasso-Verfahren soll auf den Daten für verschiedene Komplexitätsvorgaben (via Penalty-Parameter) sachgerecht angewendet und die Ergebnisse interpretiert werden. Es soll gezeigt werden, wie sich in Abhängigkeit vom Penalty-Parameter der Messfehler an der Validierungsstichprobe entwickelt und wie sich dabei die Anzahl der vom Modell nicht berücksichtigten Merkmale (also mit Koeffizient=0) in Abhängigkeit vom Penalty-Parameter verändert. (Lernziel 4.1.2) - __[10&nbsp;Punkte]__
+
+```{r}
+
+```
+
+
+### 3.2.3 Das Elastic-Net-Verfahren
+
+### A-27: Als abschließendes lineares Modell soll das Elastic-Net-Verfahren sachgerecht angewendet werden. Wie hängt dieses mit der Ridge-Regression und LASSO-Regression zusammen? Auch hier sollen die Hyperparameter über eine mehrdimensionale "Randomized Search" bestimmt werden. Welche Vor- und Nachteile hat dieses Vorgehen gegenüber anderen Optimierungsverfahren und welche Implikationen ergeben sich für die praktische Anwendbarkeit? (Lernziel 4.1.2) - __[10&nbsp;Punkte]__
+
+```{r}
+
+```
+
+## 3.3. Vorwärtsgerichtetes Neuronales Netz mit Keras/TensorFlow
+
+### A-28: Als letztes Modell wird ein vorwärtsgerichtetes künstliches neuronales Netz (MLP) herangezogen, das mit Keras/Tensorflow mit zwei bis drei verborgenen Schichten mit mindestens 35.000 zu trainierenden Gewichten sowie dropout-Regularisierung zu implementieren ist. Die gewählte Startarchitektur, die Optimierungsstrategie sowie der Umgang mit „Over-Fitting“ und schwankenden Prognoseergebnissen sollen erläutert werden. 
+
+### Die als optimal erachtete finale Netzarchitektur soll insgesamt drei Mal vollständig neu (d.h. Definition, Initialisierung & Zufallszahlen, Kompilierung, Ausführung, Evaluierung) im Notebook nacheinander angewandt und die Validierungsergebnisse angezeigt werden. Die erzielte Modellgüten und deren Varianz sollen insbesondere mit den Ergebnissen der Gradient-Boosting-Verfahren verglichen und unter Einbeziehung des Modellierungsaufwands eine vergleichende Bewertung sowie eine abschließende Modellempfehlung dokumentiert werden. (Lernziele 3.2.2, 4.1.7, 4.3.1) - __[20&nbsp;Punkte]__
+
+```{r}
+
+```
+
+# 4. Blending und Scoring
+
+### A-29: Abschließend ist die Prognosegüte (MAE) der Modelle graphisch zu vergleichen. Welche Schlussfolgerung ergibt sich für ein finales Ensemble der Lerner? (Lernziele 4.1.5, 4.1.7) - __[5&nbsp;Punkte]__
+
+```{r}
+
+```
+
+### A-30: Es ist ein finales Ensemble aus mindestens zwei Modellklassen zu konstruieren. Welche Modellgüte ergibt sich an den Validierungsdaten und wie ist diese im Vergleich zu den einzelnen Modellen einzuordnen?  Welche praktischen Implikationen im Hinblick auf die Nutzbarkeit ergeben sich im Hinblick auf das Life-Cycle-Management von zusammengesetzten Lernern und wie sind diese mit praktischen Anforderungen der Wiederverwendbarkeit (also bspw. Re-Training) und Wartbarkeit des Codes zu vereinbaren? (Lernziel 4.1.7) - __[8&nbsp;Punkte]__
+
+```{r}
+
+```
+
+### A-31: Das finale Ensemble aus Aufgabe 30 soll auf die Testdaten angewendet werden. Welche Modellgüte ergibt sich? Worauf können Unterschiede zur in Aufgabe 30 ermittelten Modellgüte zurückzuführen sein? Des weiteren soll überprüft werden, ob die an den Testdaten durchgeführte Schadenaufwandsprognose insgesamt erwartungstreu ist und erklärt werden, worauf der beobachtete Unterschied zurückzufügen ist und welche Konsequenzen das für eine Anwendung in der Tarifierung hätte.  (Lernziel 4.1.7) - __[8&nbsp;Punkte]__
+
+```{r}
+
+```
+
